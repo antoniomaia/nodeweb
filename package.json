@@ -1,0 +1,12 @@
+{
+  "name": "nodeweb",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "author": "am",
+  "dependencies": {
+    "express": "latest",
+    "request": "latest",
+    "cheerio": "latest"
+  }
+}
