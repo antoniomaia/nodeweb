@@ -1,53 +1,48 @@
-var express = require('express');
-var fs = require('fs');
-var request = require('request');
-var cheerio = require('cheerio');
-var app = express();
+let express = require('express');
+let request = require('request');
+let cheerio = require('cheerio');
+let fs = require('fs');
+let app = express();
 
-app.get('/scrape', function(req, res) {
+app.get('/scrape', function (req, res) {
   // the URL we will scrape from
-  url = 'http://www.imdb.com/title/tt0133093/';
+  url = 'https://www.worldwildlife.org/species/directory?direction=desc&sort=extinction_status';
 
   // request call
-  request(url, function(error, response, html) {
+  request(url, function (error, response, html) {
     // check to make sure no errors
     if (!error) {
       // utilize the cheerio library to give us jQuery functionality
-      var $ = cheerio.load(html);
-      console.log("r");
+      const $ = cheerio.load(html);
       // variables to capture
-      var title, release, rating;
-      var json = {
-        title: "",
-        release: "",
-        rating: ""
-      };
+      let commonName, scientificName, conservationStatus;
+      var species = [];
 
-      $('.title_wrapper').filter(function() {
+      $('table tbody tr').each(function (i, elem) {
         // store data into a variable so we can easily see what's going on
-        var data = $(this);
-        title = data.children().first().text();
-        var regExp = /\(([^)]+)\)/;
-        release = regExp.exec(title);
-        json.title = title.split('(')[0].trim();
-        json.release = release[1].trim();
+        let dataList = $(this).children();
+
+        if (dataList != null) {
+          species[i] = {
+            commonName: (dataList[0].children[0].firstChild) ? dataList[0].children[0].firstChild.nodeValue : "",
+            scientificName: (dataList[1].children[0].firstChild) ? dataList[1].children[0].firstChild.nodeValue : "",
+            conservationStatus: (dataList[2].children[0]) ? dataList[2].children[0].nodeValue : ""
+          }
+        }
+
       });
 
-      $('.ratingValue').filter(function() {
-        var data = $(this);
-        rating = data.text();
-        json.rating = rating.split(/\n/)[1].trim();
-      });
     }
 
-// built in 'fs' library
-    fs.writeFile('output.json', JSON.stringify(json, null, 4), function(err){
+    // built in 'fs' library
+    fs.writeFile('output.json', JSON.stringify(species, null, 4), function (err) {
       console.log('File succcessfully written! - Check your project directory');
     });
 
     // just send out a message to the browser
-    res.send(json);
+    res.send(species);
   });
+
 });
 
 app.listen('8081');
