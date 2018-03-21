@@ -11,9 +11,8 @@ app.get('/species', function (req, res) {
     'https://www.worldwildlife.org/species/directory?direction=desc&page=2&sort=extinction_status'
   ];
 
-  let result = {
-    species: []
-  };
+  let speciesDirectory = [];
+
   function parse(html) {
     let commonName, scientificName, conservationStatus;
 
@@ -24,7 +23,7 @@ app.get('/species', function (req, res) {
       let dataList = $(this).children();
 
       if (dataList != null) {
-        result.species.push({
+        speciesDirectory.push({
           commonName: (dataList[0].children[0].firstChild) ? dataList[0].children[0].firstChild.nodeValue : "",
           scientificName: (dataList[1].children[0].firstChild) ? dataList[1].children[0].firstChild.nodeValue : "",
           conservationStatus: (dataList[2].children[0]) ? dataList[2].children[0].nodeValue : ""
@@ -33,20 +32,31 @@ app.get('/species', function (req, res) {
 
     });
 
-    return result;
+    return speciesDirectory;
   }
 
-  let append = file => result => fse.outputFile(file, JSON.stringify(result, null, 4))
+  let append = file => speciesDirectory => fse.outputFile(file, JSON.stringify(speciesDirectory, null, 4));
+
+  let promises = [];
+  function extractSpecies(url) {
+    promises.push(
+      rp(url)
+        .then(parse)
+        .then(append('output.json'))
+        .then(() => console.log('Success'))
+        .catch(err => console.log('Error: ', err))
+    );
+  }
 
   urls.forEach(url => {
-    rp(url)
-      .then(parse)
-      .then(append('output.json'))
-      .then(() => console.log('Success'))
-      .catch(err => console.log('Error: ', err));
-  })
+    console.log("calling extractSpecies");
+    extractSpecies(url);
+  });
 
-  res.send('Check your console!')
+  Promise.all(promises).then(speciesDirectorys => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(speciesDirectory, null, 4));
+  });
 
 })
 

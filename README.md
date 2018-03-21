@@ -9,4 +9,4 @@ $ npm install
 $ node server.js
 ```
 
-Then it will start up our node server, navigate to http://localhost:8081/species and check your projects folder.
+Then it will start up our node server, navigate to http://localhost:8081/species and you will see all the retrieved information, check your project folder for a JSON file.
