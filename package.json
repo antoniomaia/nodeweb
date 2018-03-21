@@ -5,8 +5,11 @@
   "main": "server.js",
   "author": "am",
   "dependencies": {
+    "cheerio": "latest",
     "express": "latest",
+    "fs-extra": "^5.0.0",
+    "fs-promise": "^2.0.3",
     "request": "latest",
-    "cheerio": "latest"
+    "request-promise": "^4.2.2"
   }
 }
